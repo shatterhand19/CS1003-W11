@@ -1,0 +1,6 @@
+# Created by .ignore support plugin (hsz.mobi)
+.gitignore
+.idea/
+CS1003-W11.iml
+/hadoop-3.0.0-alpha2/
+!/hadoop-3.0.0-alpha2/share/hadoop/
