@@ -37,6 +37,11 @@ public class JobBuilder {
         return this;
     }
 
+    public JobBuilder setSort(Class sortComparator) {
+        this.job.setSortComparatorClass(sortComparator);
+        return this;
+    }
+
     public JobBuilder setReducer(Class reducerClass) {
         this.job.setReducerClass(reducerClass);
         return this;

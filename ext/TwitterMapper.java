@@ -9,11 +9,11 @@ import java.io.StringReader;
 
 /**
  * Created by bozhidar on 11.04.17.
- *
  */
 
 public class TwitterMapper extends Mapper<LongWritable, Text, Text, LongWritable> {
     private final static LongWritable ONE = new LongWritable(1);
+
     @Override
     public void map(LongWritable key, Text value, Context output) throws IOException, InterruptedException {
         try {
@@ -36,7 +36,7 @@ public class TwitterMapper extends Mapper<LongWritable, Text, Text, LongWritable
                 }
             }
         } catch (JsonException e) {
-            System.out.println(e.getMessage());
+            ExceptionGUI.displayExceptionWithWait(e);
         }
     }
 }
