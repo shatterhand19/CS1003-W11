@@ -3,10 +3,17 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.LocalJobRunner;
 import org.apache.hadoop.mapreduce.Job;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created by bozhidar on 17.04.17.
@@ -54,6 +61,43 @@ public class JobExecutor {
         } catch (ClassNotFoundException | IOException | InterruptedException e) {
             ExceptionGUI.displayExceptionWithoutWait(e);
         }
+    }
+
+    public void mostRetweeted(boolean verbose) throws IOException {
+        Job mostRetweeted = new JobBuilder().createJob(conf, "Most retweeted")
+                .setPaths(input_path, output_path)
+                .setMapper(MostRetweetedMapper.class)
+                .setMapperTypes(Text.class, LongWritable.class)
+                //.setSort(LongWritable.DecreasingComparator.class)
+                .setReducer(MostRetweetedReducer.class)
+                .setReducerTypes(LongWritable.class, Text.class).getJob();
+
+        try {
+            mostRetweeted.waitForCompletion(verbose);
+        } catch (ClassNotFoundException | IOException | InterruptedException e) {
+            ExceptionGUI.displayExceptionWithoutWait(e);
+        }
+    }
+
+    public void simpleCountGraph(boolean verbose, int maxJobs) throws IOException {
+        Job countHashtags = new JobBuilder().createJob(conf, "Hashtag Count")
+                .setPaths(input_path, output_path)
+                .setMapper(TwitterMapper.class)
+                .setMapperTypes(Text.class, LongWritable.class)
+                .setReducer(TwitterReducer.class)
+                .setReducerTypes(Text.class, LongWritable.class).getJob();
+
+        LocalJobRunner.setLocalMaxRunningMaps(countHashtags, maxJobs);
+        try {
+            long start = System.currentTimeMillis();
+            countHashtags.waitForCompletion(verbose);
+            long totalTime = (System.currentTimeMillis() - start);
+        } catch (ClassNotFoundException | IOException | InterruptedException e) {
+            ExceptionGUI.displayExceptionWithoutWait(e);
+        }
+
+
+
     }
 
     public void ready(String jobName) {

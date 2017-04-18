@@ -1,9 +1,16 @@
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created by bozhidar on 17.04.17.
@@ -63,7 +70,9 @@ public class GUIRunner extends JFrame implements ActionListener {
     public JPanel buildOperationRun() {
         Object[] options = new String[]{
                 "Simple count",
-                "Most popular"
+                "Most popular",
+                "Most retweeted",
+                "Simple count - benchmark"
         };
 
         functions = new JComboBox(options);
@@ -146,6 +155,89 @@ public class GUIRunner extends JFrame implements ActionListener {
                                         getMostPopular.ready("Sort by popularity");
 
                                         new ResultDisplayer("Most popular", new String[]{"Hashtag", "Occurences"});
+                                    } catch (IOException e) {
+                                        ExceptionGUI.displayExceptionWithoutWait(e);
+                                    }
+                                }
+                            }).start();
+
+                            break;
+                        }
+                        case "Most retweeted": {
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        JobExecutor countHashtags = new JobExecutor(input_path, DEFAULT_TEMP_DIR);
+                                        countHashtags.mostRetweeted(false);
+
+
+                                        JobExecutor sortRetweeted = new JobExecutor(DEFAULT_TEMP_DIR, DEFAULT_OUTPUT_PATH);
+                                        sortRetweeted.mostPopular(false);
+
+                                        sortRetweeted.ready("Most retweeted");
+                                        new ResultDisplayer("Most retweeted", new String[]{"User id", "Retweets"});
+                                    } catch (IOException e) {
+                                        ExceptionGUI.displayExceptionWithoutWait(e);
+                                    }
+                                }
+                            }).start();
+
+                            break;
+                        }
+                        case "Simple count - benchmark": {
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        XYSeriesCollection dataset = new XYSeriesCollection();
+                                        XYSeries seriesIncreasing = new XYSeries("Increasing jobs");
+                                        XYSeries seriesDecreasing = new XYSeries("Decreasing jobs");
+                                        for (int jobs = 1; jobs < 6; jobs ++) {
+                                            long startTime = System.currentTimeMillis();
+                                            JobExecutor countHashtags = new JobExecutor(input_path, DEFAULT_OUTPUT_PATH);
+                                            countHashtags.simpleCountGraph(false, jobs);
+                                            long totalTime = System.currentTimeMillis() - startTime;
+                                            seriesIncreasing.add(jobs, totalTime);
+                                        }
+                                        for (int jobs = 5; jobs > 0; jobs --) {
+                                            long startTime = System.currentTimeMillis();
+                                            JobExecutor countHashtags = new JobExecutor(input_path, DEFAULT_OUTPUT_PATH);
+                                            countHashtags.simpleCountGraph(false, jobs);
+                                            long totalTime = System.currentTimeMillis() - startTime;
+                                            seriesDecreasing.add(jobs, totalTime);
+                                        }
+
+                                        dataset.addSeries(seriesIncreasing);
+                                        dataset.addSeries(seriesDecreasing);
+                                        String chartTitle = "Multiple jobs benchmark";
+                                        String xAxisLabel = "Max jobs";
+                                        String yAxisLabel = "Time (ms)";
+
+                                        JFreeChart chart = ChartFactory.createXYLineChart(chartTitle,
+                                                xAxisLabel, yAxisLabel, dataset);
+
+                                        JPanel chartPanel = new ChartPanel(chart);
+
+                                        try {
+                                            SwingUtilities.invokeAndWait(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    JFrame chartWindow = new JFrame("Benchmark results");
+                                                    chartWindow.setContentPane(chartPanel);
+                                                    chartWindow.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                                                    chartWindow.pack();
+                                                    chartWindow.setVisible(true);
+                                                }
+                                            });
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        } catch (InvocationTargetException e) {
+                                            e.printStackTrace();
+                                        }
+                                        //countHashtags.ready("Simple Count benchmark");
+
+                                        //new ResultDisplayer("Hashtag count", new String[]{"Hashtag", "Occurences"});
                                     } catch (IOException e) {
                                         ExceptionGUI.displayExceptionWithoutWait(e);
                                     }
