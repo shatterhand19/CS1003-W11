@@ -6,6 +6,10 @@ import java.io.IOException;
 
 /**
  * Created by bozhidar on 17.04.17.
+ *
+ * Reducer for the most retweeted user;
+ * It just sums the number of all of the retweets for all his tweets.
+ *
  */
 public class MostRetweetedReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
     @Override

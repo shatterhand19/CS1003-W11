@@ -6,6 +6,9 @@ import java.io.IOException;
 
 /**
  * Created by bozhidar on 12.04.17.
+ *
+ * Reducer that finds the sum of counts for hashtags.
+ *
  */
 public class TwitterReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
     @Override

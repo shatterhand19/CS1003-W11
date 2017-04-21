@@ -5,18 +5,16 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.LocalJobRunner;
 import org.apache.hadoop.mapreduce.Job;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created by bozhidar on 17.04.17.
+ *
+ * Class that provides all methods for the creation and execution
+ * of the different job functions used by the program.
+ *
  */
 public class JobExecutor {
     private String input_path,
@@ -24,14 +22,28 @@ public class JobExecutor {
     private JobConf conf;
     private FileSystem fileSystem;
 
+    /**
+     * Constructor.
+     * @param input_path is the input path for the jobs this executor will perform
+     * @param output_path is the output path for the jobs this executor will perform
+     * @throws IOException
+     */
     public JobExecutor(String input_path, String output_path) throws IOException {
         this.input_path = input_path;
         this.output_path = output_path;
+
+        //Create new configuration
         conf = new JobConf();
+
+        //Delete the output path
         fileSystem = FileSystem.getLocal(conf);
         fileSystem.delete(new Path(output_path), true);
     }
-
+    /*
+     * The four methods above have the same structure:
+     * Create a job with the appropriate parameters and
+     * then execute it.
+    */
     public void simpleCount(boolean verbose) throws IOException {
         Job countHashtags = new JobBuilder().createJob(conf, "Hashtag Count")
                 .setPaths(input_path, output_path)
@@ -43,7 +55,7 @@ public class JobExecutor {
         try {
             countHashtags.waitForCompletion(verbose);
         } catch (ClassNotFoundException | IOException | InterruptedException e) {
-            ExceptionGUI.displayExceptionWithoutWait(e);
+            ExceptionGUI.displayException(e);
         }
     }
 
@@ -59,7 +71,7 @@ public class JobExecutor {
         try {
             sortPopular.waitForCompletion(verbose);
         } catch (ClassNotFoundException | IOException | InterruptedException e) {
-            ExceptionGUI.displayExceptionWithoutWait(e);
+            ExceptionGUI.displayException(e);
         }
     }
 
@@ -75,7 +87,7 @@ public class JobExecutor {
         try {
             mostRetweeted.waitForCompletion(verbose);
         } catch (ClassNotFoundException | IOException | InterruptedException e) {
-            ExceptionGUI.displayExceptionWithoutWait(e);
+            ExceptionGUI.displayException(e);
         }
     }
 
@@ -89,17 +101,16 @@ public class JobExecutor {
 
         LocalJobRunner.setLocalMaxRunningMaps(countHashtags, maxJobs);
         try {
-            long start = System.currentTimeMillis();
             countHashtags.waitForCompletion(verbose);
-            long totalTime = (System.currentTimeMillis() - start);
         } catch (ClassNotFoundException | IOException | InterruptedException e) {
-            ExceptionGUI.displayExceptionWithoutWait(e);
+            ExceptionGUI.displayException(e);
         }
-
-
-
     }
 
+    /**
+     * Displays a popup with "Job -job_name- is ready" message
+     * @param jobName is the name of the job
+     */
     public void ready(String jobName) {
         JOptionPane.showMessageDialog(null,
                 "Job " + jobName + " is ready!",

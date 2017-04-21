@@ -9,6 +9,9 @@ import java.io.StringReader;
 
 /**
  * Created by bozhidar on 11.04.17.
+ *
+ * Mapper for reading hashtags from the file and add them with count 1 to the output.
+ *
  */
 
 public class TwitterMapper extends Mapper<LongWritable, Text, Text, LongWritable> {
@@ -19,15 +22,12 @@ public class TwitterMapper extends Mapper<LongWritable, Text, Text, LongWritable
         try {
             JsonReader reader = Json.createReader(new BufferedReader(new StringReader(value.toString())));
             JsonObject root = reader.readObject();
-            if (!root.containsKey("entities")) {
-                System.out.println("Broken JSON");
-            } else {
+            if (root.containsKey("entities")) {
                 JsonObject entitites = root.getJsonObject("entities");
-                if (!entitites.containsKey("hashtags")) {
-                    System.out.println("Broken JSON");
-                } else {
+                if (entitites.containsKey("hashtags")) {
                     JsonArray hashtags = entitites.getJsonArray("hashtags");
                     for (int i = 0; i < hashtags.size(); i++) {
+                        //For each hashtag: read it and add it with count 1, if not null
                         String hashtag = hashtags.getJsonObject(i).getString("text");
                         if (hashtag != null) {
                             output.write(new Text(hashtag), ONE);
@@ -36,7 +36,7 @@ public class TwitterMapper extends Mapper<LongWritable, Text, Text, LongWritable
                 }
             }
         } catch (JsonException e) {
-            ExceptionGUI.displayExceptionWithWait(e);
+            ExceptionGUI.displayExceptionWait(e);
         }
     }
 }

@@ -9,6 +9,10 @@ import java.io.StringReader;
 
 /**
  * Created by bozhidar on 17.04.17.
+ *
+ * Mapper that is used for getting the id of a tweeter and the total
+ * number of retweets he has.
+ *
  */
 public class MostRetweetedMapper extends Mapper<LongWritable, Text, Text, LongWritable> {
     @Override
@@ -21,8 +25,10 @@ public class MostRetweetedMapper extends Mapper<LongWritable, Text, Text, LongWr
                 if (retweeted.containsKey("user")) {
                     JsonObject user = retweeted.getJsonObject("user");
                     if (user.containsKey("id_str")) {
+                        //Get the id of the tweeter
                         Text id = new Text(String.valueOf(user.get("id_str")));
                         if (retweeted.containsKey("retweet_count")) {
+                            //Get the retweet count
                             LongWritable retweet_count = new LongWritable(Integer.parseInt(retweeted.get("retweet_count").toString()));
                             context.write(id, retweet_count);
                         }
@@ -30,7 +36,7 @@ public class MostRetweetedMapper extends Mapper<LongWritable, Text, Text, LongWr
                 }
             }
         } catch (JsonException e) {
-            ExceptionGUI.displayExceptionWithWait(e);
+            ExceptionGUI.displayExceptionWait(e);
         }
     }
 }
