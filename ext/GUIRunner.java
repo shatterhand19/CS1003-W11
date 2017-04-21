@@ -33,7 +33,7 @@ public class GUIRunner extends JFrame implements ActionListener {
 
     public GUIRunner(String name) {
         //Sets the  display of the exceptions
-        ExceptionGUI.display = false;
+        ExceptionGUI.display = true;
         //Sets the title of the window
         setTitle(name);
 
@@ -169,19 +169,11 @@ public class GUIRunner extends JFrame implements ActionListener {
                  * the user my be wondering why the button is inactive.
                  */
                 if (chosenDirectory.getText().equals("Directory: ...")) {
-                    try {
-                        SwingUtilities.invokeAndWait(new Runnable() {
-                            @Override
-                            public void run() {
-                                JOptionPane.showMessageDialog(null,
+                    JOptionPane.showMessageDialog(null,
                                         "You have not selected directory!",
                                         "No directory error",
                                         JOptionPane.ERROR_MESSAGE);
-                            }
-                        });
-                    } catch (InterruptedException | InvocationTargetException e) {
-                        ExceptionGUI.displayException(e);
-                    }
+
                 } else {
                     //Get the input path
                     String input_path = chosenDirectory.getText();

@@ -18,7 +18,12 @@ public class MostRetweetedMapper extends Mapper<LongWritable, Text, Text, LongWr
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         try {
-            JsonReader reader = Json.createReader(new BufferedReader(new StringReader(value.toString())));
+            //Create the code for the DEL char
+            String string = value.toString();
+            String DEL = Character.toString((char)127);
+            //Replace it in the string
+            string = string.replaceAll(DEL, "");
+            JsonReader reader = Json.createReader(new BufferedReader(new StringReader(string)));
             JsonObject root = reader.readObject();
             if (root.containsKey("retweeted_status")) {
                 JsonObject retweeted = root.getJsonObject("retweeted_status");

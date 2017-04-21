@@ -20,7 +20,12 @@ public class TwitterMapper extends Mapper<LongWritable, Text, Text, LongWritable
     @Override
     public void map(LongWritable key, Text value, Context output) throws IOException, InterruptedException {
         try {
-            JsonReader reader = Json.createReader(new BufferedReader(new StringReader(value.toString())));
+            //Create the code for the DEL char
+            String string = value.toString();
+            String DEL = Character.toString((char)127);
+            //Replace it in the string
+            string = string.replaceAll(DEL, "");
+            JsonReader reader = Json.createReader(new BufferedReader(new StringReader(string)));
             JsonObject root = reader.readObject();
             if (root.containsKey("entities")) {
                 JsonObject entitites = root.getJsonObject("entities");
