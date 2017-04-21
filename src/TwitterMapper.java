@@ -19,13 +19,9 @@ public class TwitterMapper extends Mapper<LongWritable, Text, Text, LongWritable
         try {
             JsonReader reader = Json.createReader(new BufferedReader(new StringReader(value.toString())));
             JsonObject root = reader.readObject();
-            if (!root.containsKey("entities")) {
-                System.out.println("Broken JSON");
-            } else {
+            if (root.containsKey("entities")) {
                 JsonObject entitites = root.getJsonObject("entities");
-                if (!entitites.containsKey("hashtags")) {
-                    System.out.println("Broken JSON");
-                } else {
+                if (entitites.containsKey("hashtags")) {
                     JsonArray hashtags = entitites.getJsonArray("hashtags");
                     for (int i = 0; i < hashtags.size(); i++) {
                         String hashtag = hashtags.getJsonObject(i).getString("text");
